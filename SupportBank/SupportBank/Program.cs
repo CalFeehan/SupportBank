@@ -34,12 +34,22 @@ namespace SupportBank
 
                 users[creditor].updateBalance(transaction);
                 users[debtor].updateBalance(transaction);
-            }  
 
-            foreach (var pair in users)
+                printAllTransactions(users[debtor]);
+
+            }
+
+            void printAllBalances()
             {
-                Console.WriteLine($"{pair.Value.Username}: {pair.Value.Balance}");
-                Console.WriteLine(pair.Value.ToString());
+                foreach (var pair in users)
+                {
+                    Console.WriteLine($"{pair.Value.Username}: {pair.Value.Balance}");
+                }
+            }
+
+            void printAllTransactions(Account account)
+            {
+                Console.WriteLine(account.ToString());
             }
         }
     }

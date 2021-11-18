@@ -22,11 +22,12 @@ namespace SupportBank
             Balance = transaction.Debtor == this ? Balance - transaction.Amount : Balance + transaction.Amount;
             Transactions.Add(transaction);
         }
-        
+
         public override string ToString()
         {
             string output = "";
-            foreach (Transaction transaction in Transactions) {
+            foreach (Transaction transaction in Transactions)
+            {
                 output += transaction.ToString() + "\n";
             }
             return output;
