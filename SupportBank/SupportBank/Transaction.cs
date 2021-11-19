@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,6 +7,8 @@ namespace SupportBank
 {
     class Transaction
     {
+        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+
         public DateTime TransactionDate { get; }
         public Account Debtor { get; }
         public Account Creditor { get; }
@@ -15,6 +18,7 @@ namespace SupportBank
 
         public Transaction(DateTime transactionDate, Account debtor, Account creditor, string service, decimal amount)
         {
+            Logger.Info($"Transaction created for {debtor.Username}");
             TransactionDate = transactionDate;
             Debtor = debtor;
             Creditor = creditor;
@@ -24,6 +28,7 @@ namespace SupportBank
 
         public override string ToString()
         {
+            Logger.Info("Function Transaction ToString called");
             return $"{TransactionDate.ToShortDateString()}: {Debtor.Username} paid {Creditor.Username} {Amount:C} for {Service}";
         }
     }

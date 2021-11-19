@@ -1,4 +1,7 @@
-﻿using System;
+﻿using NLog;
+using NLog.Config;
+using NLog.Targets;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,13 +10,20 @@ namespace SupportBank
 {
     class Program
     {
-        private static string path = @".\Transactions2014.csv";
+        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+        private static string path = @".\DodgyTransactions2015.csv";
         private static string[] text = Utility.readFileSkipLines(path, 1);
-        // [transactionDate, debtor, creditor, service, amount]
+
         private static Dictionary<string, Account> users = new Dictionary<string, Account>();
 
         static void Main(string[] args)
         {
+            var config = new LoggingConfiguration();
+            var target = new FileTarget { FileName = @"C:\Users\Callum.Feehan\OneDrive\Documents\Apprenticeship\C Sharp Bootcamp\SupportBank\SupportBank\SupportBank\logs\SupportBank.log", Layout = @"${longdate} ${level} - ${logger}: ${message}" };
+            config.AddTarget("File Logger", target);
+            config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, target));
+            LogManager.Configuration = config;
+
             initialiseDatabase();
 
             bool loop = true;
@@ -28,13 +38,10 @@ namespace SupportBank
                         printAllBalances();
                         break;
                     default:
-                        try
+                        try { printAllTransactions(users[userInput]); }
+                        catch
                         {
-                            printAllTransactions(users[userInput]);
-                        }
-                        catch 
-                        { 
-                            // log no account exists
+                            Logger.Warn($"No account found with name {userInput}");
                         }
                         break;
                 }
@@ -43,13 +50,16 @@ namespace SupportBank
 
         static void initialiseDatabase()
         {
+            Logger.Info("Function initialiseDatabase called");
+            int i = 1;
             foreach (string line in text)
             {
                 string[] item = line.Split(",");
 
                 if (!DateTime.TryParse(item[0], out DateTime transactionDate))
                 {
-                    // log error
+                    Logger.Error($"Could not parse datetime from line {i}");
+                    i++;
                     continue;
                 }
                 string debtor = item[1];
@@ -57,7 +67,8 @@ namespace SupportBank
                 string service = item[3];
                 if (!decimal.TryParse(item[4], out decimal amount))
                 {
-                    // log error
+                    Logger.Error($"Could not parse decimal from line {i}");
+                    i++;
                     continue;
                 }
 
@@ -68,11 +79,15 @@ namespace SupportBank
 
                 users[creditor].updateBalance(transaction);
                 users[debtor].updateBalance(transaction);
+
+                i++;
             }
         }
 
         static void printAllBalances()
         {
+            Logger.Info("Function printAllBalances called");
+
             foreach (var pair in users)
             {
                 Console.WriteLine($"{pair.Value.Username}: {pair.Value.Balance:C}");
@@ -81,6 +96,8 @@ namespace SupportBank
 
         static void printAllTransactions(Account account)
         {
+            Logger.Info($"Function printAllTransactions called on account {account.Username}.");
+
             Console.WriteLine(account.getTransactions());
         }
     }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,16 +10,21 @@ namespace SupportBank
 {
     class Utility
     {
+        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
         public static string[] readFileSkipLines(string path, int linesToSkip)
         {
-            try { string[] text = File.ReadAllLines(path);
+            Logger.Info($"Function readFileSkipLines called with path {path} and linesToSkip {linesToSkip}");
+
+            try
+            {
+                string[] text = File.ReadAllLines(path);
                 text = text.Skip(linesToSkip).ToArray();
                 return text;
             }
             catch (FileNotFoundException e) 
             {
-                Console.WriteLine(e);
+                Logger.Info($"{e} thrown on file {path}");
                 throw;
             }
         }
@@ -39,7 +45,7 @@ namespace SupportBank
                 }
                 else
                 {
-                    // user input wrong
+                    Logger.Warn($"User input not allowed {userInput}");
                     continue;
                 }
             }
