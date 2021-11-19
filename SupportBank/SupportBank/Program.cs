@@ -9,12 +9,10 @@ namespace SupportBank
     {
         static void Main(string[] args)
         {
-            string path = @".\Transactions2014.csv";
-            string[] text = File.ReadAllLines(path);
-            text = text.Skip(1).ToArray();
-
             Dictionary<string, Account> users = new Dictionary<string, Account>();
 
+            string path = @".\Transactions2014.csv";
+            string[] text = Utility.readFileSkipLines(path, 1);
             // [transactionDate, debtor, creditor, service, amount]
 
             foreach (string line in text)
@@ -34,16 +32,17 @@ namespace SupportBank
 
                 users[creditor].updateBalance(transaction);
                 users[debtor].updateBalance(transaction);
-
-                printAllTransactions(users[debtor]);
-
             }
+
+            // test calls
+            printAllBalances();
+            printAllTransactions(users["Jon A"]);
 
             void printAllBalances()
             {
                 foreach (var pair in users)
                 {
-                    Console.WriteLine($"{pair.Value.Username}: {pair.Value.Balance}");
+                    Console.WriteLine($"{pair.Value.Username}: {pair.Value.Balance:C}");
                 }
             }
 
