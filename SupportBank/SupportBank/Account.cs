@@ -23,7 +23,7 @@ namespace SupportBank
             Transactions.Add(transaction);
         }
 
-        public override string ToString()
+        public string getTransactions()
         {
             string output = "";
             foreach (Transaction transaction in Transactions)

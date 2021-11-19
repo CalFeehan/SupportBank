@@ -7,23 +7,59 @@ namespace SupportBank
 {
     class Program
     {
+        private static string path = @".\Transactions2014.csv";
+        private static string[] text = Utility.readFileSkipLines(path, 1);
+        // [transactionDate, debtor, creditor, service, amount]
+        private static Dictionary<string, Account> users = new Dictionary<string, Account>();
+
         static void Main(string[] args)
         {
-            Dictionary<string, Account> users = new Dictionary<string, Account>();
+            initialiseDatabase();
 
-            string path = @".\Transactions2014.csv";
-            string[] text = Utility.readFileSkipLines(path, 1);
-            // [transactionDate, debtor, creditor, service, amount]
+            bool loop = true;
+            while (loop) {
+                string userInput = Utility.userInput();
+                switch (userInput.ToLower())
+                {
+                    case "quit":
+                        loop = false;
+                        break;
+                    case "all":
+                        printAllBalances();
+                        break;
+                    default:
+                        try
+                        {
+                            printAllTransactions(users[userInput]);
+                        }
+                        catch 
+                        { 
+                            // log no account exists
+                        }
+                        break;
+                }
+            }
+        }
 
+        static void initialiseDatabase()
+        {
             foreach (string line in text)
             {
                 string[] item = line.Split(",");
 
-                DateTime transactionDate = DateTime.Parse(item[0]);
+                if (!DateTime.TryParse(item[0], out DateTime transactionDate))
+                {
+                    // log error
+                    continue;
+                }
                 string debtor = item[1];
                 string creditor = item[2];
                 string service = item[3];
-                decimal amount = Decimal.Parse(item[4]);
+                if (!decimal.TryParse(item[4], out decimal amount))
+                {
+                    // log error
+                    continue;
+                }
 
                 users.TryAdd(creditor, new Account(creditor));
                 users.TryAdd(debtor, new Account(debtor));
@@ -33,23 +69,19 @@ namespace SupportBank
                 users[creditor].updateBalance(transaction);
                 users[debtor].updateBalance(transaction);
             }
+        }
 
-            // test calls
-            printAllBalances();
-            printAllTransactions(users["Jon A"]);
-
-            void printAllBalances()
+        static void printAllBalances()
+        {
+            foreach (var pair in users)
             {
-                foreach (var pair in users)
-                {
-                    Console.WriteLine($"{pair.Value.Username}: {pair.Value.Balance:C}");
-                }
+                Console.WriteLine($"{pair.Value.Username}: {pair.Value.Balance:C}");
             }
+        }
 
-            void printAllTransactions(Account account)
-            {
-                Console.WriteLine(account.ToString());
-            }
+        static void printAllTransactions(Account account)
+        {
+            Console.WriteLine(account.getTransactions());
         }
     }
 }
